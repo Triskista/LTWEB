@@ -7,15 +7,14 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import vn.iostar.models.UserModel;
 import vn.iostar.services.impl.UserService;
 import vn.iostar.utils.Constant;
 
 @WebServlet(urlPatterns = { "/register" })
 public class RegisterController extends HttpServlet {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	@Override
@@ -62,6 +61,12 @@ public class RegisterController extends HttpServlet {
 			req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
 			return;
 		}
+		if (service.checkExistPhone(phone)) {
+			alertMsg = "Số điện thoại đã tồn tại!";
+			req.setAttribute("alert", alertMsg);
+			req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
+			return;
+		}
 		UserModel user = service.register(username, password, email, fullname, phone);
 		if (user != null) {
 			// SendMail sm = new SendMail();
@@ -69,7 +74,9 @@ public class RegisterController extends HttpServlet {
 			// to use service. Thanks !");
 			alertMsg = "Tạo thành công!";
 			req.setAttribute("alert", alertMsg);
-			resp.sendRedirect(req.getContextPath() + "/login");
+		    HttpSession session = req.getSession(true); 
+		    session.setAttribute("account", user);
+			resp.sendRedirect(req.getContextPath() + "/waiting");
 		} else {
 			alertMsg = "System error!";
 			req.setAttribute("alert", alertMsg);

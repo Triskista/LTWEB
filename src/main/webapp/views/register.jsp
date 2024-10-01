@@ -2,9 +2,9 @@
 	pageEncoding="UTF-8"%>
 <div class="main">
 	<div class="container">
-		
+
 		<!-- BEGIN CONTENT -->
-		
+
 		<div class="col-md-9 col-sm-9">
 			<h1>Create an account</h1>
 			<div class="content-form-page">
@@ -67,6 +67,17 @@
 								</div>
 
 							</fieldset>
+							<!-- <fieldset>
+                      <legend>Newsletter</legend>
+                      <div class="checkbox form-group">
+                        <label>
+                          <div class="col-lg-4 col-sm-4">Singup for Newsletter</div>
+                          <div class="col-lg-8 col-sm-8">
+                            <input type="checkbox">
+                          </div>
+                        </label>
+                      </div>
+                    </fieldset>  !-->
 							<div class="row">
 								<div
 									class="col-lg-8 col-md-offset-4 padding-left-0 padding-top-20">
@@ -97,8 +108,8 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<!-- END CONTENT -->
-	
+
 	</div>
 </div>
