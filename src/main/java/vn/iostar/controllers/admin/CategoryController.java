@@ -69,63 +69,65 @@ public class CategoryController extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String url = req.getRequestURI();
-		req.setCharacterEncoding("UTF-8");
-		resp.setCharacterEncoding("UTF-8");
-		String images = "";
-		String categoryname = req.getParameter("categoryname");
-		int status = Integer.parseInt(req.getParameter("status"));
+	    String url = req.getRequestURI();
+	    req.setCharacterEncoding("UTF-8");
+	    resp.setCharacterEncoding("UTF-8");
 
-		// String uploadPath = UPLOAD_DIRECTORY // lưu vào thư mục trong máy
-		String uploadPath = getServletContext().getRealPath("") + File.separator + "upload"; 
-		File uploadDir = new File(uploadPath);
-		if (!uploadDir.exists())
-			uploadDir.mkdir();
+	    String categoryname = req.getParameter("categoryname");
+	    int status = Integer.parseInt(req.getParameter("status"));
+	    String imagesLink = req.getParameter("imageslink"); // Lấy link ảnh từ form
 
-		try {
-			String fileName = "";
-			// Duyệt qua các part trong request
-			for (Part part : req.getParts()) {
-				// Kiểm tra nếu part là file (có content-disposition)
-				if (part.getSubmittedFileName() != null && !part.getSubmittedFileName().isEmpty()) {
-					fileName = getFileName(part);
-					part.write(uploadPath + File.separator + fileName);
-					if (fileName == "" && req.getParameter("imageslink") != null) {
-						images = req.getParameter("imageslink");
-					} else {
-						images = fileName;
-					}
-				}
-			}
-		} catch (FileNotFoundException fne) {
-			req.setAttribute("message", "Có lỗi xảy ra: " + fne.getMessage());
-		}
+	    String uploadPath = getServletContext().getRealPath("") + File.separator + "upload";
+	    File uploadDir = new File(uploadPath);
+	    if (!uploadDir.exists()) {
+	        uploadDir.mkdir(); // Tạo thư mục nếu chưa tồn tại
+	    }
 
-		if (url.contains("insert")) {
+	    String images = ""; // Khởi tạo biến lưu tên ảnh
 
-			CategoryModel category = new CategoryModel();
-			category.setCategoryname(categoryname);
-			category.setStatus(status);
-			category.setImages(images);
-			cateService.insert(category);
-			resp.sendRedirect(req.getContextPath() + "/admin/categories");
-		} else if (url.contains("update")) {
+	    try {
+	        // Ưu tiên sử dụng link từ trường imageslink nếu không rỗng
+	        if (imagesLink != null && !imagesLink.trim().isEmpty()) {
+	            images = imagesLink; // Nếu có link ảnh, sử dụng link này
+	        } else {
+	            // Kiểm tra nếu người dùng tải lên file ảnh
+	            for (Part part : req.getParts()) {
+	                if (part.getSubmittedFileName() != null && !part.getSubmittedFileName().isEmpty()) {
+	                    String fileName = getFileName(part);
+	                    part.write(uploadPath + File.separator + fileName); // Lưu file ảnh lên server
+	                    images = fileName; // Lưu đường dẫn ảnh
+	                }
+	            }
+	        }
+	    } catch (FileNotFoundException fne) {
+	        req.setAttribute("message", "Có lỗi xảy ra: " + fne.getMessage());
+	    }
 
-			int categoryid = Integer.parseInt(req.getParameter("categoryid"));
-			if (images == "") {
+	    if (url.contains("insert")) {
+	        // Xử lý thêm mới category
+	        CategoryModel category = new CategoryModel();
+	        category.setCategoryname(categoryname);
+	        category.setStatus(status);
+	        category.setImages(images);
+	        cateService.insert(category);
+	        resp.sendRedirect(req.getContextPath() + "/admin/categories");
+	    } else if (url.contains("update")) {
+	        // Xử lý cập nhật category
+	        int categoryid = Integer.parseInt(req.getParameter("categoryid"));
 
-				CategoryModel a = cateService.findById(categoryid);
-				images = a.getImages();
-			}
+	        // Nếu không có ảnh nào (cả file và link), lấy ảnh hiện tại từ DB
+	        if (images.isEmpty()) {
+	            CategoryModel existingCategory = cateService.findById(categoryid);
+	            images = existingCategory.getImages(); // Giữ lại ảnh cũ nếu không có ảnh mới
+	        }
 
-			CategoryModel category = new CategoryModel();
-			category.setCategoryid(categoryid);
-			category.setCategoryname(categoryname);
-			category.setStatus(status);
-			category.setImages(images);
-			cateService.update(category);
-			resp.sendRedirect(req.getContextPath() + "/admin/categories");
-		}
+	        CategoryModel category = new CategoryModel();
+	        category.setCategoryid(categoryid);
+	        category.setCategoryname(categoryname);
+	        category.setStatus(status);
+	        category.setImages(images);
+	        cateService.update(category);
+	        resp.sendRedirect(req.getContextPath() + "/admin/categories");
+	    }
 	}
-
 }

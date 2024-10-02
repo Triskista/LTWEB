@@ -71,6 +71,8 @@ public class CategoryDaoImpl implements ICategoryDao {
 	public static void main(String[] args) {
 		CategoryDaoImpl userDao = new CategoryDaoImpl();
 		
+		//System.out.println(userDao.findAll());
+		
 		System.out.println(userDao.findName("ip"));
 		
 	}
